@@ -66,7 +66,7 @@ export default function RiderLiveMap({ riderId, customerLat, customerLng }: Ride
           table: "rider_locations",
           filter: `rider_id=eq.${riderId}`,
         },
-        (payload: any) => {
+        (payload: { new: { lat: number; lng: number } }) => {
           setRiderPos([Number(payload.new.lat), Number(payload.new.lng)]);
         }
       )

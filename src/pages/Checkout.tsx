@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-// import MapPicker from "@/components/delivery/MapPicker";
+import MapPicker from "@/components/delivery/MapPicker";
 
 export default function Checkout() {
   const { user } = useAuth();
@@ -153,10 +153,9 @@ export default function Checkout() {
               <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="rounded-xl" placeholder="Enter your full address" />
             </div>
 
-            {/* <MapPicker 
+            <MapPicker 
               onLocationSelect={(lat, lng) => setCoords({ lat, lng })}
-            /> */}
-            <p className="text-[10px] text-muted-foreground italic">Map temporarily disabled for debugging...</p>
+            />
           </div>
         )}
       </div>

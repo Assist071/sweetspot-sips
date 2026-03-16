@@ -134,16 +134,16 @@ export default function OrderTracking() {
                     </div>
                     
                     {/* Live Tracking Map */}
-                    {(order.status as any) === "out_for_delivery" && (order as any).lat && (order as any).lng && (
+                    {order.status === "out_for_delivery" && order.lat && order.lng && (
                       <div className="pt-6">
                         <p className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-3 flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
                           Live Delivery Tracking
                         </p>
                         <RiderLiveMap 
-                          riderId={(order as any).rider_id || ""} 
-                          customerLat={Number((order as any).lat)}
-                          customerLng={Number((order as any).lng)}
+                          riderId={order.rider_id || ""} 
+                          customerLat={Number(order.lat)}
+                          customerLng={Number(order.lng)}
                         />
                       </div>
                     )}
