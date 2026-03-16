@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Coffee } from "lucide-react";
+import { User, Lock, Coffee, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -52,10 +53,17 @@ export default function Login() {
         _role: "admin"
       });
 
+      const { data: isRider } = await supabase.rpc("has_role", {
+        _user_id: data.user.id,
+        _role: "rider"
+      });
+
       setLoading(false);
       toast({ title: "Welcome back! 🧋" });
       if (isAdmin) {
         navigate("/admin");
+      } else if (isRider) {
+        navigate("/rider");
       } else {
         navigate("/");
       }
@@ -98,17 +106,24 @@ export default function Login() {
               <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-primary/60">Password</Label>
               <Link to="/forgot-password" title="Forgot password?" className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/70 transition-colors">Forgot?</Link>
             </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
+            <div className="relative group/pass">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40 group-focus-within/pass:text-primary transition-colors" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="pl-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50 transition-all"
+                className="pl-12 pr-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50 transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 

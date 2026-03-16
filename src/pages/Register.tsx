@@ -17,7 +17,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
-import { User, Phone, Mail, Lock, MapPin, Hash, UserCircle, SendHorizontal, CheckCircle2 } from "lucide-react";
+import { User, Phone, Mail, Lock, MapPin, Hash, UserCircle, SendHorizontal, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 interface CityData {
   zipCode: string;
@@ -58,6 +58,8 @@ export default function Register() {
   });
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -318,16 +320,48 @@ export default function Register() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
             <div className="space-y-2">
               <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest ml-1 text-primary/60">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-                <Input id="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleInputChange} required minLength={6} className="pl-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50" />
+              <div className="relative group/pass">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40 group-focus-within/pass:text-primary transition-colors" />
+                <Input 
+                  id="password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="••••••••" 
+                  value={formData.password} 
+                  onChange={handleInputChange} 
+                  required 
+                  minLength={6} 
+                  className="pl-12 pr-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-[10px] font-black uppercase tracking-widest ml-1 text-primary/60">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-                <Input id="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={handleInputChange} required minLength={6} className="pl-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50" />
+              <div className="relative group/conf">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40 group-focus-within/conf:text-primary transition-colors" />
+                <Input 
+                  id="confirmPassword" 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  placeholder="••••••••" 
+                  value={formData.confirmPassword} 
+                  onChange={handleInputChange} 
+                  required 
+                  minLength={6} 
+                  className="pl-12 pr-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors focus:outline-none"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
           </div>

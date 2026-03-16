@@ -13,7 +13,9 @@ import {
   Key,
   SendHorizontal,
   CheckCircle2,
-  ArrowLeft
+  ArrowLeft,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import {
   InputOTP,
@@ -31,6 +33,8 @@ export default function AdminRegister() {
   });
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -206,25 +210,48 @@ export default function AdminRegister() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest ml-1 text-primary/60">Secure Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-              <Input id="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleInputChange} required minLength={6} className="pl-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50" />
+            <div className="relative group/pass">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40 group-focus-within/pass:text-primary transition-colors" />
+              <Input 
+                id="password" 
+                type={showPassword ? "text" : "password"} 
+                placeholder="••••••••" 
+                value={formData.password} 
+                onChange={handleInputChange} 
+                required 
+                minLength={6} 
+                className="pl-12 pr-12 h-12 rounded-2xl border-primary/5 focus:border-primary/20 bg-white/50" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
           <div className="space-y-2 pt-2">
             <Label htmlFor="secretKey" className="text-[10px] font-black uppercase tracking-widest ml-1 text-primary">Admin Secret Key</Label>
-            <div className="relative">
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
+            <div className="relative group/key">
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40 group-focus-within/key:text-primary transition-colors" />
               <Input
                 id="secretKey"
-                type="password"
+                type={showSecretKey ? "text" : "password"}
                 placeholder="Required for authorization"
                 value={formData.secretKey}
                 onChange={handleInputChange}
                 required
-                className="pl-12 h-12 rounded-2xl border-primary/40 focus:border-primary focus-visible:ring-primary/20 bg-white shadow-sm"
+                className="pl-12 pr-12 h-12 rounded-2xl border-primary/40 focus:border-primary focus-visible:ring-primary/20 bg-white shadow-sm"
               />
+              <button
+                type="button"
+                onClick={() => setShowSecretKey(!showSecretKey)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors focus:outline-none"
+              >
+                {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
