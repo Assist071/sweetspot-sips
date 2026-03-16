@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Package, Clock, MapPin, ChevronRight, ShoppingBag } from "lucide-react";
 import OrderProgressBar from "@/components/orders/OrderProgressBar";
+import RiderLiveMap from "@/components/delivery/RiderLiveMap";
 
 type Order = Tables<"orders"> & { order_items: Tables<"order_items">[] };
 
@@ -131,6 +132,21 @@ export default function OrderTracking() {
                         </div>
                       ))}
                     </div>
+                    
+                    {/* Live Tracking Map */}
+                    {(order.status as any) === "out_for_delivery" && (order as any).lat && (order as any).lng && (
+                      <div className="pt-6">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-3 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                          Live Delivery Tracking
+                        </p>
+                        <RiderLiveMap 
+                          riderId={(order as any).rider_id || ""} 
+                          customerLat={Number((order as any).lat)}
+                          customerLng={Number((order as any).lng)}
+                        />
+                      </div>
+                    )}
 
                     {/* Progress Bar */}
                     <div className="pt-4 border-t border-primary/5">

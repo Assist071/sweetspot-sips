@@ -7,17 +7,20 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, PlayCircle, XCircle, Clock } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 type Order = Tables<"orders"> & { 
   order_items: Tables<"order_items">[],
-  profiles?: any
+  profiles?: any,
+  rider_id?: string | null
 };
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { sendStatusNotification } = useNotifications();
 
   const fetchOrders = async () => {
     try {
@@ -50,11 +53,23 @@ export default function AdminOrders() {
   }, []);
 
   const updateStatus = async (orderId: string, status: string) => {
-    const { error } = await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
+    let updateData: any = { status };
+    
+    // Auto-assign a mock rider ID for demo purposes if shipping
+    if (status === "out_for_delivery") {
+      updateData.rider_id = "00000000-0000-0000-0000-000000000000"; // Mock Rider ID
+    }
+
+    const { error } = await supabase.from("orders").update(updateData).eq("id", orderId);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: `Order status changed to ${status}` });
+      // Send notification
+      const order = orders.find(o => o.id === orderId);
+      if (order?.user_id) {
+        sendStatusNotification(order.user_id, orderId, status);
+      }
     }
   };
 
@@ -65,6 +80,27 @@ export default function AdminOrders() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Order marked as Picked Up" });
+    }
+  };
+
+  const simulateRiderMovement = async (riderId: string, customerLat: number, customerLng: number) => {
+    // Simulate a point closer to the customer
+    const mockLat = customerLat + (Math.random() - 0.5) * 0.01;
+    const mockLng = customerLng + (Math.random() - 0.5) * 0.01;
+
+    const { error } = await supabase
+      .from("rider_locations" as any)
+      .upsert({ 
+        rider_id: riderId, 
+        lat: mockLat, 
+        lng: mockLng,
+        updated_at: new Date().toISOString()
+      } as any);
+
+    if (error) {
+      toast({ title: "Simulate Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Rider location updated! Check the customer's map." });
     }
   };
 
@@ -190,13 +226,27 @@ export default function AdminOrders() {
                             </Button>
                           )}
                           {(order.status as any) === "out_for_delivery" && (
-                            <Button 
-                              size="sm" 
-                              className="h-8 px-4 rounded-full text-[9px] font-bold uppercase bg-blue-600 hover:bg-blue-700"
-                              onClick={() => updateStatus(order.id, "delivered")}
-                            >
-                              Delivered
-                            </Button>
+                            <div className="flex flex-col gap-2 w-full">
+                              <Button 
+                                size="sm" 
+                                className="h-8 px-4 rounded-full text-[9px] font-bold uppercase bg-blue-600 hover:bg-blue-700"
+                                onClick={() => updateStatus(order.id, "delivered")}
+                              >
+                                Delivered
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="h-8 px-4 rounded-full text-[9px] font-bold uppercase border-blue-200 text-blue-600 hover:bg-blue-50"
+                                onClick={() => simulateRiderMovement(
+                                  (order as any).rider_id || "00000000-0000-0000-0000-000000000000",
+                                  Number((order as any).lat),
+                                  Number((order as any).lng)
+                                )}
+                              >
+                                📡 Mock GPS Move
+                              </Button>
+                            </div>
                           )}
                           {order.status === "complete" && !order.notes?.includes("[PICKED_UP]") && (
                             <Button 

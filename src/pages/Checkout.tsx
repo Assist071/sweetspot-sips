@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+// import MapPicker from "@/components/delivery/MapPicker";
 
 export default function Checkout() {
   const { user } = useAuth();
@@ -16,17 +17,46 @@ export default function Checkout() {
   const { toast } = useToast();
   const [orderType, setOrderType] = useState<"pickup" | "delivery">("pickup");
   const [address, setAddress] = useState("");
+  const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchProfile = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data) {
+        const p = data as any;
+        const parts = [
+          p.complete_address,
+          p.barangay,
+          p.city,
+          p.zip_code
+        ].filter(Boolean);
+        
+        if (parts.length > 0) {
+          setAddress(parts.join(", "));
+        }
+      }
+      setProfileLoading(false);
+    };
+
+    fetchProfile();
+  }, [user]);
 
   if (!user) {
-    navigate("/login");
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   if (items.length === 0) {
-    navigate("/cart");
-    return null;
+    return <Navigate to="/cart" replace />;
   }
 
   const handleCheckout = async () => {
@@ -62,6 +92,8 @@ export default function Checkout() {
         total_amount: finalTotal,
         delivery_fee: deliveryFee,
         delivery_address: orderType === "delivery" ? address : null,
+        lat: orderType === "delivery" ? coords?.lat : null,
+        lng: orderType === "delivery" ? coords?.lng : null,
         notes: notes || null,
       })
       .select()
@@ -115,9 +147,16 @@ export default function Checkout() {
           ))}
         </div>
         {orderType === "delivery" && (
-          <div className="mt-4">
-            <Label htmlFor="address">Delivery Address</Label>
-            <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="rounded-xl" placeholder="Enter your full address" />
+          <div className="mt-4 space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="address">Delivery Address</Label>
+              <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="rounded-xl" placeholder="Enter your full address" />
+            </div>
+            
+            {/* <MapPicker 
+              onLocationSelect={(lat, lng) => setCoords({ lat, lng })}
+            /> */}
+            <p className="text-[10px] text-muted-foreground italic">Map temporarily disabled for debugging...</p>
           </div>
         )}
       </div>
