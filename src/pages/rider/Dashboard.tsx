@@ -34,21 +34,21 @@ export default function RiderDashboard() {
 
   const fetchOrders = async () => {
     try {
-      // Available orders: status = 'complete' (ready for pickup) and order_type = 'delivery'
+      // Available orders: status = 'complete' (ready for pickup) or 'preparing' (upcoming)
       const { data: available } = await supabase
         .from("orders")
         .select("*, order_items(*)")
         .eq("order_type", "delivery")
-        .eq("status", "complete")
+        .in("status", ["preparing", "complete"])
         .is("rider_id", null)
         .order("created_at", { ascending: false });
 
-      // Active orders: assigned to this rider and in 'out_for_delivery' status
+      // Active orders: assigned to this rider and not yet delivered
       const { data: active } = await supabase
         .from("orders")
         .select("*, order_items(*)")
         .eq("rider_id", user?.id)
-        .eq("status", "out_for_delivery")
+        .in("status", ["preparing", "complete", "out_for_delivery"])
         .order("updated_at", { ascending: false });
 
       if (available) setAvailableOrders(available);
@@ -75,10 +75,13 @@ export default function RiderDashboard() {
   }, [user]);
 
   const acceptOrder = async (orderId: string) => {
+    const order = availableOrders.find(o => o.id === orderId);
+    const nextStatus = order?.status === "complete" ? "out_for_delivery" : order?.status;
+
     const { error } = await supabase
       .from("orders")
       .update({ 
-        status: "out_for_delivery", 
+        status: nextStatus,
         rider_id: user?.id 
       })
       .eq("id", orderId);
@@ -101,6 +104,20 @@ export default function RiderDashboard() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Delivery Complete! 🏁", description: "Good job, rider!" });
+      fetchOrders();
+    }
+  };
+
+  const pickUpOrder = async (orderId: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "out_for_delivery" })
+      .eq("id", orderId);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Order Picked Up!", description: "Drive safe, rider!" });
       fetchOrders();
     }
   };
@@ -173,8 +190,17 @@ export default function RiderDashboard() {
                         <h3 className="font-display font-bold text-lg">Delivery to {order.delivery_address?.split(',')[0]}</h3>
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
-                        <Clock className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(order.created_at))} ago
+                        {order.status === "preparing" ? (
+                          <div className="flex items-center gap-1.5 text-orange-500">
+                             <Clock className="h-3 w-3 animate-spin-slow" />
+                             In Prep
+                          </div>
+                        ) : (
+                          <>
+                             <Clock className="h-3 w-3" />
+                             {formatDistanceToNow(new Date(order.created_at))} ago
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -272,19 +298,32 @@ export default function RiderDashboard() {
                     </div>
 
                     <div className="p-6 bg-white border-t border-primary/5 flex items-center justify-between">
-                       <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-foreground/40">Earnings for this trip</p>
-                          <p className="text-xl font-display font-black text-primary">₱{order.delivery_fee?.toFixed(2) || "50.00"}</p>
-                       </div>
-                       <Button 
-                        onClick={() => completeDelivery(order.id)}
-                        className="bg-success hover:bg-success/90 rounded-full px-8 font-black uppercase text-[11px] h-12 shadow-soft"
-                      >
-                        <CheckCircle2 className="mr-2 h-5 w-5" />
-                        Complete Delivery
-                      </Button>
-                    </div>
-                  </Card>
+                        <div className="flex flex-col items-end gap-2">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-foreground/40">Earnings: <span className="text-primary">₱{order.delivery_fee?.toFixed(2) || "50.00"}</span></p>
+                          {order.status === "complete" ? (
+                            <Button 
+                              onClick={() => pickUpOrder(order.id)}
+                              className="bg-primary hover:bg-primary/90 rounded-full px-8 font-black uppercase text-[11px] h-12 shadow-soft"
+                            >
+                              <Package className="mr-2 h-5 w-5" />
+                              Confirm Pickup
+                            </Button>
+                          ) : order.status === "preparing" ? (
+                            <Button disabled className="bg-muted rounded-full px-8 font-black uppercase text-[11px] h-12 shadow-none cursor-not-allowed">
+                               Waiting for Kitchen...
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={() => completeDelivery(order.id)}
+                              className="bg-success hover:bg-success/90 rounded-full px-8 font-black uppercase text-[11px] h-12 shadow-soft"
+                            >
+                              <CheckCircle2 className="mr-2 h-5 w-5" />
+                              Complete Delivery
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
                 </motion.div>
               ))}
             </AnimatePresence>

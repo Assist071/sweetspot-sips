@@ -215,7 +215,7 @@ export default function AdminOrders() {
                             <Button 
                               size="sm" 
                               className="h-8 px-4 rounded-full text-[9px] font-bold uppercase bg-success hover:bg-success/90"
-                              onClick={() => updateStatus(order.id, "complete")}
+                              onClick={() => updateStatus(order.id, order.rider_id ? "out_for_delivery" : "complete")}
                             >
                               {order.order_type === "delivery" ? "Ready to Ship" : "Done"}
                             </Button>
