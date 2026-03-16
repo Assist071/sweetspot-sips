@@ -11,9 +11,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 type Order = Tables<"orders"> & { 
-  order_items: Tables<"order_items">[],
-  profiles?: any,
-  rider_id?: string | null
+  order_items: Tables<"order_items">[]
 };
 
 export default function AdminOrders() {
@@ -52,8 +50,8 @@ export default function AdminOrders() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const updateStatus = async (orderId: string, status: string) => {
-    let updateData: any = { status };
+  const updateStatus = async (orderId: string, status: OrderStatus) => {
+    const updateData: Database["public"]["Tables"]["orders"]["Update"] = { status };
     
     // Auto-assign a mock rider ID for demo purposes if shipping
     if (status === "out_for_delivery") {
@@ -89,13 +87,12 @@ export default function AdminOrders() {
     const mockLng = customerLng + (Math.random() - 0.5) * 0.01;
 
     const { error } = await supabase
-      .from("rider_locations" as any)
+      .from("rider_locations")
       .upsert({ 
         rider_id: riderId, 
         lat: mockLat, 
-        lng: mockLng,
-        updated_at: new Date().toISOString()
-      } as any);
+        lng: mockLng
+      });
 
     if (error) {
       toast({ title: "Simulate Error", description: error.message, variant: "destructive" });
@@ -114,14 +111,14 @@ export default function AdminOrders() {
   const getOrdersByStatus = (status: string) => {
     if (status === "active") {
       return orders.filter(o => 
-        ((o.status as any) === "complete" && !o.notes?.includes("[PICKED_UP]")) || 
-        (o.status as any) === "out_for_delivery"
+        (o.status === "complete" && !o.notes?.includes("[PICKED_UP]")) || 
+        o.status === "out_for_delivery"
       );
     }
     if (status === "finished") {
       return orders.filter(o => 
-        (o.status as any) === "delivered" || 
-        ((o.status as any) === "complete" && o.notes?.includes("[PICKED_UP]"))
+        o.status === "delivered" || 
+        (o.status === "complete" && o.notes?.includes("[PICKED_UP]"))
       ).slice(0, 10); // Show only recent 10 finished
     }
     return orders.filter(o => o.status === status);
@@ -220,9 +217,9 @@ export default function AdminOrders() {
                             <Button 
                               size="sm" 
                               className="h-8 px-4 rounded-full text-[9px] font-bold uppercase bg-success hover:bg-success/90"
-                              onClick={() => updateStatus(order.id, (order.order_type as any) === "delivery" ? "out_for_delivery" : "complete")}
+                              onClick={() => updateStatus(order.id, order.order_type === "delivery" ? "out_for_delivery" : "complete")}
                             >
-                              {(order.order_type as any) === "delivery" ? "Ship" : "Done"}
+                              {order.order_type === "delivery" ? "Ship" : "Done"}
                             </Button>
                           )}
                           {(order.status as any) === "out_for_delivery" && (
@@ -239,9 +236,9 @@ export default function AdminOrders() {
                                 variant="outline"
                                 className="h-8 px-4 rounded-full text-[9px] font-bold uppercase border-blue-200 text-blue-600 hover:bg-blue-50"
                                 onClick={() => simulateRiderMovement(
-                                  (order as any).rider_id || "00000000-0000-0000-0000-000000000000",
-                                  Number((order as any).lat),
-                                  Number((order as any).lng)
+                                  order.rider_id || "00000000-0000-0000-0000-000000000000",
+                                  Number(order.lat),
+                                  Number(order.lng)
                                 )}
                               >
                                 📡 Mock GPS Move

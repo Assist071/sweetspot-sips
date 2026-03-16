@@ -46,12 +46,12 @@ export default function RiderLiveMap({ riderId, customerLat, customerLng }: Ride
 
     // Fetch initial location
     const fetchInitialLoc = async () => {
-      const { data } = await (supabase
-        .from("rider_locations" as any)
-        .select("lat, lng") as any)
+      const { data } = await supabase
+        .from("rider_locations")
+        .select("lat, lng")
         .eq("rider_id", riderId)
         .single();
-      if (data) setRiderPos([Number((data as any).lat), Number((data as any).lng)]);
+      if (data) setRiderPos([Number(data.lat), Number(data.lng)]);
     };
     fetchInitialLoc();
 
@@ -59,7 +59,7 @@ export default function RiderLiveMap({ riderId, customerLat, customerLng }: Ride
     const channel = supabase
       .channel(`rider-${riderId}`)
       .on(
-        "postgres_changes" as any,
+        "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",

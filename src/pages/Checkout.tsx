@@ -33,7 +33,7 @@ export default function Checkout() {
         .single();
 
       if (data) {
-        const p = data as any;
+        const p = data;
         const parts = [
           p.complete_address,
           p.barangay,

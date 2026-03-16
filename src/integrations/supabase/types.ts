@@ -95,9 +95,13 @@ export type Database = {
         Row: {
           created_at: string
           delivery_address: string | null
+          delivery_fee: number | null
           id: string
+          lat: number | null
+          lng: number | null
           notes: string | null
           order_type: Database["public"]["Enums"]["order_type"]
+          rider_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           total_amount: number
           updated_at: string
@@ -106,9 +110,13 @@ export type Database = {
         Insert: {
           created_at?: string
           delivery_address?: string | null
+          delivery_fee?: number | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           notes?: string | null
           order_type?: Database["public"]["Enums"]["order_type"]
+          rider_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string
@@ -117,9 +125,13 @@ export type Database = {
         Update: {
           created_at?: string
           delivery_address?: string | null
+          delivery_fee?: number | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           notes?: string | null
           order_type?: Database["public"]["Enums"]["order_type"]
+          rider_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string
@@ -190,32 +202,44 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
+          barangay: string | null
+          city: string | null
+          complete_address: string | null
           created_at: string
           full_name: string | null
           id: string
           phone: string | null
           updated_at: string
           user_id: string
+          zip_code: string | null
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
+          barangay?: string | null
+          city?: string | null
+          complete_address?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
           updated_at?: string
           user_id: string
+          zip_code?: string | null
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
+          barangay?: string | null
+          city?: string | null
+          complete_address?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
           updated_at?: string
           user_id?: string
+          zip_code?: string | null
         }
         Relationships: []
       }
@@ -237,6 +261,57 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_locations: {
+        Row: {
+          id: string
+          last_updated: string
+          lat: number
+          lng: number
+          rider_id: string
+        }
+        Insert: {
+          id?: string
+          last_updated?: string
+          lat: number
+          lng: number
+          rider_id: string
+        }
+        Update: {
+          id?: string
+          last_updated?: string
+          lat?: number
+          lng?: number
+          rider_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -252,7 +327,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      order_status: "pending" | "preparing" | "complete" | "cancelled"
+      order_status: "pending" | "preparing" | "complete" | "cancelled" | "out_for_delivery" | "delivered"
       order_type: "pickup" | "delivery"
     }
     CompositeTypes: {
