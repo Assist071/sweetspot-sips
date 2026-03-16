@@ -24,7 +24,7 @@ export default function Checkout() {
 
   useEffect(() => {
     if (!user) return;
-    
+
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
@@ -40,7 +40,7 @@ export default function Checkout() {
           p.city,
           p.zip_code
         ].filter(Boolean);
-        
+
         if (parts.length > 0) {
           setAddress(parts.join(", "));
         }
@@ -68,12 +68,12 @@ export default function Checkout() {
         .select("stock_quantity")
         .eq("id", item.productId)
         .single();
-      
+
       if (!product || (product.stock_quantity !== null && product.stock_quantity < item.quantity)) {
-        toast({ 
-          title: "Out of stock", 
-          description: `Sorry, ${item.name} is out of stock.`, 
-          variant: "destructive" 
+        toast({
+          title: "Out of stock",
+          description: `Sorry, ${item.name} is out of stock.`,
+          variant: "destructive"
         });
         setLoading(false);
         return;
@@ -152,7 +152,7 @@ export default function Checkout() {
               <Label htmlFor="address">Delivery Address</Label>
               <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="rounded-xl" placeholder="Enter your full address" />
             </div>
-            
+
             {/* <MapPicker 
               onLocationSelect={(lat, lng) => setCoords({ lat, lng })}
             /> */}
