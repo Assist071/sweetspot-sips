@@ -6,7 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useState } from "react";
 
 export default function Navbar() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isRider, signOut } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,6 +34,13 @@ export default function Navbar() {
           {user && (
             <Link to="/orders" className="font-body font-semibold text-foreground/70 hover:text-primary transition-all duration-300 relative group">
               My Orders
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            </Link>
+          )}
+          {isRider && (
+            <Link to="/rider" className="font-body font-semibold text-primary hover:text-primary/80 transition-all duration-300 relative group flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              Rider POV
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
             </Link>
           )}
@@ -78,6 +85,7 @@ export default function Navbar() {
         <div className="md:hidden bg-card border-b p-4 space-y-2 animate-fade-in">
           <Link to="/menu" onClick={() => setMobileOpen(false)} className="block p-2 font-display font-medium rounded-lg hover:bg-muted">Menu</Link>
           {user && <Link to="/orders" onClick={() => setMobileOpen(false)} className="block p-2 font-display font-medium rounded-lg hover:bg-muted">My Orders</Link>}
+          {isRider && <Link to="/rider" onClick={() => setMobileOpen(false)} className="block p-2 font-display font-medium rounded-lg hover:bg-muted text-primary">Rider POV</Link>}
           <Link to="/contact" onClick={() => setMobileOpen(false)} className="block p-2 font-display font-medium rounded-lg hover:bg-muted">Contact</Link>
           {user ? (
             <>

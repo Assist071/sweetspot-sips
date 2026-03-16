@@ -53,11 +53,9 @@ export default function AdminOrders() {
   const updateStatus = async (orderId: string, status: OrderStatus) => {
     const updateData: Database["public"]["Tables"]["orders"]["Update"] = { status };
     
-    // Auto-assign a mock rider ID for demo purposes if shipping
-    if (status === "out_for_delivery") {
-      updateData.rider_id = "00000000-0000-0000-0000-000000000000"; // Mock Rider ID
-    }
-
+    // Orders now wait for a real rider to accept them from the Rider Dashboard
+    // when the status becomes 'complete' and rider_id is null.
+    
     const { error } = await supabase.from("orders").update(updateData).eq("id", orderId);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -217,9 +215,9 @@ export default function AdminOrders() {
                             <Button 
                               size="sm" 
                               className="h-8 px-4 rounded-full text-[9px] font-bold uppercase bg-success hover:bg-success/90"
-                              onClick={() => updateStatus(order.id, order.order_type === "delivery" ? "out_for_delivery" : "complete")}
+                              onClick={() => updateStatus(order.id, "complete")}
                             >
-                              {order.order_type === "delivery" ? "Ship" : "Done"}
+                              {order.order_type === "delivery" ? "Ready to Ship" : "Done"}
                             </Button>
                           )}
                           {(order.status as any) === "out_for_delivery" && (

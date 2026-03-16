@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import CustomerLayout from "@/components/layout/CustomerLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import RiderLayout from "@/components/layout/RiderLayout";
 
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
@@ -30,6 +31,8 @@ import AdminCustomers from "./pages/admin/Customers";
 import AdminReports from "./pages/admin/Reports";
 import AdminInventory from "./pages/admin/Inventory";
 import AdminInfo from "./pages/admin/AdminInfo";
+import RiderDashboard from "./pages/rider/Dashboard";
+import RiderRegister from "./pages/RiderRegister";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +52,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/admin/signup" element={<AdminRegister />} />
+                <Route path="/rider/register" element={<RiderRegister />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/cart" element={<Cart />} />
@@ -67,6 +71,13 @@ const App = () => (
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/inventory" element={<AdminInventory />} />
                 <Route path="/admin/info" element={<AdminInfo />} />
+              </Route>
+              
+              {/* Rider Routes */}
+              <Route element={<ProtectedRoute riderOnly><RiderLayout /></ProtectedRoute>}>
+                <Route path="/rider" element={<RiderDashboard />} />
+                <Route path="/rider/active" element={<RiderDashboard />} />
+                <Route path="/rider/history" element={<RiderDashboard />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

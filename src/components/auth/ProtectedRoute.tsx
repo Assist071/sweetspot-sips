@@ -2,8 +2,8 @@ import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function ProtectedRoute({ children, adminOnly = false }: { children: ReactNode; adminOnly?: boolean }) {
-  const { user, isAdmin, loading } = useAuth();
+export default function ProtectedRoute({ children, adminOnly = false, riderOnly = false }: { children: ReactNode; adminOnly?: boolean; riderOnly?: boolean }) {
+  const { user, isAdmin, isRider, loading } = useAuth();
 
   if (loading) {
     return (
@@ -15,6 +15,7 @@ export default function ProtectedRoute({ children, adminOnly = false }: { childr
 
   if (!user) return <Navigate to="/login" replace />;
   if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
+  if (riderOnly && !isRider) return <Navigate to="/" replace />;
 
   return <>{children}</>;
 }

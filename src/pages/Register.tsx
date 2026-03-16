@@ -337,8 +337,9 @@ export default function Register() {
           </Button>
         </form>
 
-        <p className="text-center mt-8 text-sm text-muted-foreground font-medium">
-          Already a member? <Link to="/login" className="text-primary font-bold hover:underline">Sign In here</Link>
+        <p className="text-center mt-8 text-sm text-muted-foreground font-medium flex flex-col gap-2">
+          <span>Already a member? <Link to="/login" className="text-primary font-bold hover:underline">Sign In here</Link></span>
+          <span className="text-[10px] opacity-60">Want to deliver with us? <Link to="/rider/register" className="text-primary hover:underline font-bold italic">Join as a Rider</Link></span>
         </p>
       </div>
     </div>
