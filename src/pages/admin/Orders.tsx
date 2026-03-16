@@ -25,6 +25,7 @@ export default function AdminOrders() {
       const { data, error } = await supabase
         .from("orders")
         .select("*, order_items(*)")
+        .eq("order_type", "pickup")
         .order("created_at", { ascending: false });
       
       if (error) throw error;

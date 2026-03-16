@@ -34,12 +34,12 @@ export default function RiderDashboard() {
 
   const fetchOrders = async () => {
     try {
-      // Available orders: status = 'complete' (ready for pickup) or 'preparing' (upcoming)
+      // Available orders: all delivery orders not yet claimed by a rider
       const { data: available } = await supabase
         .from("orders")
         .select("*, order_items(*)")
         .eq("order_type", "delivery")
-        .in("status", ["preparing", "complete"])
+        .in("status", ["pending", "preparing", "complete"])
         .is("rider_id", null)
         .order("created_at", { ascending: false });
 
@@ -48,7 +48,7 @@ export default function RiderDashboard() {
         .from("orders")
         .select("*, order_items(*)")
         .eq("rider_id", user?.id)
-        .in("status", ["preparing", "complete", "out_for_delivery"])
+        .in("status", ["pending", "preparing", "complete", "out_for_delivery"])
         .order("updated_at", { ascending: false });
 
       if (available) setAvailableOrders(available);
@@ -190,16 +190,21 @@ export default function RiderDashboard() {
                         <h3 className="font-display font-bold text-lg">Delivery to {order.delivery_address?.split(',')[0]}</h3>
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
-                        {order.status === "preparing" ? (
+                        {order.status === "pending" ? (
+                          <div className="flex items-center gap-1.5 text-blue-500">
+                             <Clock className="h-3 w-3" />
+                             New Order
+                          </div>
+                        ) : order.status === "preparing" ? (
                           <div className="flex items-center gap-1.5 text-orange-500">
                              <Clock className="h-3 w-3 animate-spin-slow" />
                              In Prep
                           </div>
                         ) : (
-                          <>
-                             <Clock className="h-3 w-3" />
-                             {formatDistanceToNow(new Date(order.created_at))} ago
-                          </>
+                          <div className="flex items-center gap-1.5 text-green-500">
+                             <CheckCircle2 className="h-3 w-3" />
+                             Ready
+                          </div>
                         )}
                       </div>
                     </div>
@@ -277,7 +282,7 @@ export default function RiderDashboard() {
                             </div>
                             <div>
                                <p className={`text-[10px] font-black uppercase tracking-widest ${order.status === 'out_for_delivery' ? 'text-success' : 'text-orange-500'}`}>
-                                 {order.status === 'preparing' ? 'Restaurant is Preparing' : order.status === 'complete' ? 'Ready for Pickup' : 'Out for Delivery'}
+                               {order.status === 'pending' ? 'Waiting for Kitchen' : order.status === 'preparing' ? 'Restaurant is Preparing' : order.status === 'complete' ? 'Ready for Pickup' : 'Out for Delivery'}
                                </p>
                                <p className="font-display font-bold text-foreground truncate max-w-[200px]">{order.delivery_address}</p>
                             </div>
@@ -310,9 +315,9 @@ export default function RiderDashboard() {
                               <Package className="mr-2 h-5 w-5" />
                               Confirm Pickup
                             </Button>
-                          ) : order.status === "preparing" ? (
+                          ) : (order.status === "preparing" || order.status === "pending") ? (
                             <Button disabled className="bg-muted rounded-full px-8 font-black uppercase text-[11px] h-12 shadow-none cursor-not-allowed">
-                               Waiting for Kitchen...
+                               {order.status === "pending" ? "Order Received..." : "Preparing..."}
                             </Button>
                           ) : (
                             <Button 
