@@ -271,15 +271,17 @@ export default function RiderDashboard() {
                   <Card className="overflow-hidden rounded-[2.5rem] border-2 border-success/20 shadow-soft">
                     <div className="p-6 border-b border-primary/5 bg-success/5">
                       <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-success flex items-center justify-center text-white shadow-soft">
-                              <MapPin className="h-5 w-5" />
-                           </div>
-                           <div>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-success">Active Destination</p>
-                              <p className="font-display font-bold text-foreground truncate max-w-[200px]">{order.delivery_address}</p>
-                           </div>
-                        </div>
+                         <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white shadow-soft ${order.status === 'out_for_delivery' ? 'bg-success' : 'bg-orange-400'}`}>
+                               {order.status === 'out_for_delivery' ? <Navigation className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+                            </div>
+                            <div>
+                               <p className={`text-[10px] font-black uppercase tracking-widest ${order.status === 'out_for_delivery' ? 'text-success' : 'text-orange-500'}`}>
+                                 {order.status === 'preparing' ? 'Restaurant is Preparing' : order.status === 'complete' ? 'Ready for Pickup' : 'Out for Delivery'}
+                               </p>
+                               <p className="font-display font-bold text-foreground truncate max-w-[200px]">{order.delivery_address}</p>
+                            </div>
+                         </div>
                         <Button variant="outline" size="icon" className="rounded-xl border-success/20 text-success hover:bg-success/10" asChild>
                           <a href={`https://www.google.com/maps/dir/?api=1&destination=${order.lat},${order.lng}`} target="_blank" rel="noreferrer">
                             <ExternalLink className="h-4 w-4" />
