@@ -18,7 +18,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import MapPicker from "@/components/delivery/MapPicker";
 
-type Order = any; // Simplify for now, use proper types if available
+import type { Tables, Database } from "@/integrations/supabase/client";
+
+type Order = Tables<"orders"> & { 
+  order_items: Tables<"order_items">[]
+};
 
 export default function RiderDashboard() {
   const { user } = useAuth();
